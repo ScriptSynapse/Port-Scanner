@@ -7,7 +7,6 @@ from typing import List, Tuple
 
 DEFAULT_TIMEOUT = 1.0  # seconds for socket connection attempt
 
-
 def resolve_target(target: str) -> str:
     return socket.gethostbyname(target)
 
