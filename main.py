@@ -1,19 +1,3 @@
-"""
-Simple TCP port scanner (educational).
-
-If you run without --target, the script will prompt you to enter a target IP/hostname.
-If you run without --ports, it will prompt you to enter ports (or press Enter to use default 1-1024).
-
-Usage examples:
-  python port_scanner.py                 # interactive prompts
-  python port_scanner.py --target 127.0.0.1
-  python port_scanner.py --target example.com --ports 22,80,443 --workers 100
-
-Important:
-  Only scan hosts you own or have explicit permission to test.
-  By default this script will refuse to scan non-private/public IPs unless --allow-external is used.
-"""
-
 import argparse
 import socket
 import concurrent.futures
@@ -25,28 +9,17 @@ DEFAULT_TIMEOUT = 1.0  # seconds for socket connection attempt
 
 
 def resolve_target(target: str) -> str:
-    """Resolve hostname to IP. Raises socket.gaierror on failure."""
     return socket.gethostbyname(target)
 
 
 def is_ip_allowed(ip_str: str, allow_external: bool) -> bool:
-    """Return True if the IP is allowed to be scanned under current policy."""
     if allow_external:
         return True
     ip = ipaddress.ip_address(ip_str)
-    # allow localhost and private ranges
     return ip.is_private or ip.is_loopback
 
 
 def parse_ports(ports_arg: str) -> List[int]:
-    """
-    Parse port specification.
-    Accepts:
-      - single port: "80"
-      - range: "1-1024"
-      - csv: "22,80,443"
-      - mixed: "20-25,80,443"
-    """
     ports = set()
     parts = ports_arg.split(",")
     for p in parts:
@@ -67,7 +40,6 @@ def parse_ports(ports_arg: str) -> List[int]:
 
 
 def scan_port(ip: str, port: int, timeout: float) -> Tuple[int, bool]:
-    """Attempt a TCP connect to ip:port. Return (port, is_open)."""
     try:
         with socket.create_connection((ip, port), timeout=timeout):
             return port, True
@@ -78,9 +50,6 @@ def scan_port(ip: str, port: int, timeout: float) -> Tuple[int, bool]:
 
 
 def banner_grab(ip: str, port: int, timeout: float = 1.0) -> str:
-    """
-    Try to receive a small banner. This is optional and best-effort.
-    """
     try:
         s = socket.create_connection((ip, port), timeout=timeout)
         s.settimeout(timeout)
@@ -115,7 +84,6 @@ def run_scan(ip: str, ports: List[int], workers: int, timeout: float, grab_banne
 
 
 def prompt_if_missing(value: str, prompt_text: str, default: str = "") -> str:
-    """If value is empty or None, prompt the user. Returns the final string (may be default)."""
     if value:
         return value
     try:
